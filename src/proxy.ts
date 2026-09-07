@@ -1,15 +1,13 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// Middleware — sets CSP headers on every response, overriding the gateway's CSP.
-// This fixes the "eval blocked" warning in the preview environment.
-// The CSP allows unsafe-eval + unsafe-inline for scripts + styles in dev mode.
+// Proxy (formerly middleware in Next.js 15) — sets CSP headers on every response.
+// This overrides the preview gateway's restrictive CSP that blocks eval().
+// In Next.js 16, "middleware" was renamed to "proxy".
 
-export function middleware(_req: NextRequest) {
+export function proxy(_req: NextRequest) {
   const res = NextResponse.next()
 
-  // Set permissive CSP for dev (the preview sandbox's gateway enforces its own
-  // CSP, but our middleware header takes precedence on the response)
   res.headers.set(
     'Content-Security-Policy',
     process.env.NODE_ENV === 'production'
