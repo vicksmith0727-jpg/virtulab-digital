@@ -57,10 +57,16 @@ export async function resolveProvider(): Promise<ProviderConfig | undefined> {
 // database, not from the model. So the voice stays consistent regardless
 // of which model responds.
 
+// Fallback chain — all small fast models for automation pipeline.
+// Ordered by speed: fastest first → slightly bigger → built-in GLM.
+// These are the "bangil sa automation" — quick models for chain steps.
+// Bigger models (gemma4, LFM2.5) used for final output only.
 const FALLBACK_CHAIN = [
-  { model: 'gemma4:latest', label: 'Gemma4 (fast, 200ms)' },
-  { model: 'deepseek-r1:1.5b', label: 'DeepSeek R1 (fast reasoning, 300ms)' },
-  { model: 'hf.co/LiquidAI/LFM2.5-2.6B-GGUF:Q5_K_M', label: 'LFM2.5 (chat, 400ms)' },
+  { model: 'qwen2.5:1.5b', label: 'Qwen2.5 1.5B (fastest, ~150ms)' },
+  { model: 'deepseek-r1:1.5b', label: 'DeepSeek R1 1.5B (reasoning, ~200ms)' },
+  { model: 'qwen2.5-coder:3b', label: 'Qwen2.5 Coder 3B (code, ~300ms)' },
+  { model: 'hf.co/LiquidAI/LFM2.5-2.6B-GGUF:Q5_K_M', label: 'LFM2.5 (chat, ~400ms)' },
+  { model: 'gemma4:latest', label: 'Gemma4 (content, ~500ms)' },
 ]
 
 const FALLBACK_TIMEOUT_MS = 5000 // 5s per model before falling back

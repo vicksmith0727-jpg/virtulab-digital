@@ -74,37 +74,55 @@ export type LlmModelPreset = {
 }
 
 export const LLM_MODEL_PRESETS: LlmModelPreset[] = [
+  // ── Fastest (automation pipeline steps) ──
   {
-    id: 'lfm25',
-    label: 'LiquidAI LFM2.5 (2.6B, Q5)',
+    id: 'qwen25-1b',
+    label: 'Qwen2.5 1.5B (fastest)',
     baseUrl: 'http://localhost:11434/v1',
-    model: 'hf.co/LiquidAI/LFM2.5-2.6B-GGUF:Q5_K_M',
-    task: 'chat',
-    note: 'Fast, lightweight chat model. Good for AI Copy + AI Tool Router chat.',
+    model: 'qwen2.5:1.5b',
+    task: 'seo',
+    note: 'Fastest model. ~150ms. Use for quick classification, keyword extraction, yes/no decisions in automation chains.',
   },
   {
     id: 'deepseek-r1',
     label: 'DeepSeek R1 (1.5B)',
     baseUrl: 'http://localhost:11434/v1',
     model: 'deepseek-r1:1.5b',
+    task: 'seo',
+    note: 'Reasoning model. ~200ms. Use for SEO analysis, intent classification, content gap detection.',
+  },
+  {
+    id: 'qwen25-coder',
+    label: 'Qwen2.5 Coder (3B)',
+    baseUrl: 'http://localhost:11434/v1',
+    model: 'qwen2.5-coder:3b',
+    task: 'seo',
+    note: 'Code-focused. ~300ms. Use for schema generation, code snippets, technical SEO.',
+  },
+  // ── Chat models (conversational + content) ──
+  {
+    id: 'lfm25',
+    label: 'LiquidAI LFM2.5 (2.6B)',
+    baseUrl: 'http://localhost:11434/v1',
+    model: 'hf.co/LiquidAI/LFM2.5-2.6B-GGUF:Q5_K_M',
     task: 'chat',
-    note: 'Reasoning-focused. Good for strategic/analytical chat tasks.',
+    note: 'Chat model. ~400ms. Good for AI Copy + AI Tool Router chat.',
   },
   {
-    id: 'gemma',
-    label: 'Gemma (small, SEO tasks)',
+    id: 'gemma4',
+    label: 'Gemma4 (content gen)',
     baseUrl: 'http://localhost:11434/v1',
-    model: 'gemma',
-    task: 'seo',
-    note: 'Small + fast. Use for on-page SEO, meta tags, schema suggestions.',
+    model: 'gemma4:latest',
+    task: 'general',
+    note: 'Content generation. ~500ms. Use for blog posts, social captions, final output in pipelines.',
   },
   {
-    id: 'phi',
-    label: 'Phi (small, SEO tasks)',
+    id: 'qwen25-7b',
+    label: 'Qwen2.5 7B (heavy)',
     baseUrl: 'http://localhost:11434/v1',
-    model: 'phi',
-    task: 'seo',
-    note: 'Small + fast. Use for keyword clustering, content briefs, QA.',
+    model: 'qwen2.5:7b',
+    task: 'general',
+    note: 'Bigger model. ~1-2s. Use for complex reasoning, long-form content, strategy analysis.',
   },
 ]
 
