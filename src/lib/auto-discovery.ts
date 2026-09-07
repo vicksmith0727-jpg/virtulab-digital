@@ -114,15 +114,24 @@ export async function discoverServices(): Promise<DiscoveredService[]> {
       }))
     )
 
-    // Zeroclaw — port 3001
+    // Zeroclaw — ports 3001 + 42617 (default gateway port)
     namedChecks.push(
-      ping(`${host.base}:3001/`).then((r) => ({
+      ping(`${host.base}:42617/health`).then((r) => ({
         kind: 'zeroclaw' as const,
         name: 'Zeroclaw',
+        endpoint: `${host.base}:42617`,
+        status: r.ok ? 'reachable' : 'unreachable',
+        responseTimeMs: r.ms,
+        details: r.ok ? `Zeroclaw daemon running on ${host.label}:42617.` : `Not running on ${host.label}:42617.`,
+        host: host.label,
+      })),
+      ping(`${host.base}:3001/`).then((r) => ({
+        kind: 'zeroclaw' as const,
+        name: 'Zeroclaw (legacy port)',
         endpoint: `${host.base}:3001`,
         status: r.ok ? 'reachable' : 'unreachable',
         responseTimeMs: r.ms,
-        details: r.ok ? `Zeroclaw running on ${host.label}.` : `Not running on ${host.label}:3001.`,
+        details: r.ok ? `Zeroclaw running on ${host.label}:3001.` : `Not running on ${host.label}:3001.`,
         host: host.label,
       }))
     )

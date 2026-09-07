@@ -1,20 +1,15 @@
-// Zeroclaw integration — real wiring, not just a catalog card.
+// Zeroclaw integration — real wiring for the ZeroClaw daemon API.
 //
-// Zeroclaw (github.com/zeroclaw-labs/zeroclaw) is "fully autonomous AI personal
-// assistant infrastructure" — a Rust-based agent runtime you can deploy anywhere.
+// ZeroClaw (github.com/zeroclaw-labs/zeroclaw) is a Rust-based autonomous agent.
+// The daemon exposes:
+//   - POST /webhook   — { "message": "your prompt" } → agent response
+//   - POST /pair      — pair with X-Pairing-Code header
+//   - GET  /health    — health check
+//   - GET  /ws/chat   — WebSocket agent chat
+//   - GET  /api/*     — REST API (bearer token)
 //
-// This module:
-//   1. Looks up the user's connected Zeroclaw IntegrationConnection (by name).
-//   2. Exposes runZeroclawTask(prompt) → sends a task to the connected endpoint.
-//   3. Exposes asZeroclawProvider() → returns a ProviderConfig that routes AI
-//      calls (chat + generate) through Zeroclaw when it's connected AND enabled
-//      as the active provider (set via /api/settings/llm with kind:'zeroclaw').
-//
-// API shape auto-detection:
-//   - If the endpoint ends in /chat/completions or /v1/chat/completions, we POST
-//     an OpenAI-compatible payload.
-//   - Otherwise, we POST { prompt, ... } and read a JSON { response } or { output }
-//     or plain text back. This works with most simple agent endpoints.
+// Default port: 42617 (auto-detected)
+// Legacy port: 3001
 
 import type { ProviderConfig } from './ai'
 
@@ -22,6 +17,7 @@ export type ZeroclawConnection = {
   endpoint: string
   token: string
   model?: string
+  autoDetected?: boolean
 }
 
 export async function getZeroclawConnection(): Promise<ZeroclawConnection | null> {
@@ -44,15 +40,17 @@ export async function getZeroclawConnection(): Promise<ZeroclawConnection | null
     })()
     const endpoint = (config.endpoint || '').trim()
     const token = (config.token || '').trim()
-    if (!endpoint || !token) return null
-    return { endpoint, token, model: config.model }
+    if (!endpoint) return null
+    // For auto-detected connections, token may be 'auto-detected'
+    // — we still allow the connection, ZeroClaw's pairing handles auth
+    return { endpoint, token: token || 'auto-detected', model: config.model, autoDetected: config.autoDetected }
   } catch {
     return null
   }
 }
 
-// Send a task to Zeroclaw. Returns the agent's text response.
-// Throws on non-2xx or network error.
+// Send a task to Zeroclaw via the webhook endpoint.
+// The daemon accepts POST /webhook with { "message": "prompt" }.
 export async function runZeroclawTask(
   prompt: string,
   opts: { system?: string; maxTokens?: number } = {},
@@ -62,22 +60,50 @@ export async function runZeroclawTask(
     throw new Error('Zeroclaw is not connected. Connect it in Integrations first.')
   }
 
-  const endpoint = conn.endpoint.replace(/\/$/, '')
-  const isChatCompletions =
-    endpoint.endsWith('/chat/completions') ||
-    endpoint.endsWith('/v1/chat/completions')
+  const base = conn.endpoint.replace(/\/$/, '')
 
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-    Authorization: `Bearer ${conn.token}`,
+  // Try the webhook endpoint first (ZeroClaw daemon's native API)
+  const webhookRes = await fetch(`${base}/webhook`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(conn.token && conn.token !== 'auto-detected'
+        ? { Authorization: `Bearer ${conn.token}` }
+        : {}),
+    },
+    body: JSON.stringify({
+      message: prompt,
+      ...(opts.system ? { system: opts.system } : {}),
+    }),
+  })
+
+  if (webhookRes.ok) {
+    const data = await webhookRes.json().catch(() => ({}))
+    return (
+      data?.response ||
+      data?.output ||
+      data?.result ||
+      data?.message ||
+      data?.reply ||
+      (typeof data === 'string' ? data : '')
+    )
   }
 
-  if (isChatCompletions) {
-    // OpenAI-compatible shape
-    const res = await fetch(endpoint, {
+  // Fallback: try OpenAI-compatible chat/completions
+  const isChatEndpoint = base.endsWith('/chat/completions') || base.endsWith('/v1/chat/completions')
+  const chatUrl = isChatEndpoint
+    ? base
+    : `${base}/v1/chat/completions`
+
+  try {
+    const chatRes = await fetch(chatUrl, {
       method: 'POST',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(conn.token && conn.token !== 'auto-detected'
+          ? { Authorization: `Bearer ${conn.token}` }
+          : {}),
+      },
       body: JSON.stringify({
         model: conn.model || 'default',
         messages: [
@@ -88,63 +114,75 @@ export async function runZeroclawTask(
         temperature: 0.6,
       }),
     })
-    if (!res.ok) {
-      const text = await res.text().catch(() => '')
-      throw new Error(`Zeroclaw error ${res.status}: ${text.slice(0, 200)}`)
+
+    if (chatRes.ok) {
+      const data = await chatRes.json()
+      return data?.choices?.[0]?.message?.content ?? ''
     }
-    const data = await res.json()
-    return data?.choices?.[0]?.message?.content ?? ''
+  } catch {
+    // Fallback failed too
   }
 
-  // Simple prompt → response shape. Send { prompt } and read back
-  // { response } | { output } | { result } | { text } | plain text.
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      prompt,
-      ...(opts.system ? { system: opts.system } : {}),
-      max_tokens: opts.maxTokens ?? 1200,
-    }),
-  })
-  if (!res.ok) {
-    const text = await res.text().catch(() => '')
-    throw new Error(`Zeroclaw error ${res.status}: ${text.slice(0, 200)}`)
-  }
-  const contentType = res.headers.get('content-type') || ''
-  if (contentType.includes('application/json')) {
-    const data = await res.json()
-    return (
-      data?.response ||
-      data?.output ||
-      data?.result ||
-      data?.text ||
-      data?.message ||
-      ''
-    )
-  }
-  return res.text()
+  throw new Error(`Zeroclaw error: webhook returned ${webhookRes.status}`)
 }
 
-// Return a ProviderConfig that routes AI calls through the connected Zeroclaw
-// endpoint. Used when the user has set kind:'zeroclaw' in /api/settings/llm.
-// Falls back to undefined (use built-in) if Zeroclaw isn't connected.
+// Pair with ZeroClaw using the one-time pairing code.
+export async function pairZeroclaw(
+  endpoint: string,
+  pairingCode: string,
+): Promise<{ ok: boolean; token?: string; error?: string }> {
+  try {
+    const base = endpoint.replace(/\/$/, '')
+    const res = await fetch(`${base}/pair`, {
+      method: 'POST',
+      headers: {
+        'X-Pairing-Code': pairingCode,
+      },
+    })
+
+    if (!res.ok) {
+      return { ok: false, error: `Pairing failed: ${res.status}` }
+    }
+
+    const data = await res.json().catch(() => ({}))
+    return {
+      ok: true,
+      token: data?.token || data?.apiKey || data?.access_token || 'paired',
+    }
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : 'Pairing failed',
+    }
+  }
+}
+
+// Check ZeroClaw daemon health
+export async function checkZeroclawHealth(
+  endpoint: string,
+): Promise<{ healthy: boolean; details?: any }> {
+  try {
+    const base = endpoint.replace(/\/$/, '')
+    const res = await fetch(`${base}/health`)
+    if (!res.ok) return { healthy: false }
+    const data = await res.json().catch(() => ({}))
+    return { healthy: true, details: data }
+  } catch {
+    return { healthy: false }
+  }
+}
+
+// Return a ProviderConfig that routes AI calls through ZeroClaw.
 export async function asZeroclawProvider(): Promise<ProviderConfig | undefined> {
   const conn = await getZeroclawConnection()
   if (!conn) return undefined
-  // If the endpoint is OpenAI-compatible, route via the existing custom-provider
-  // path by returning a 'custom' ProviderConfig pointing at the chat/completions
-  // endpoint. Otherwise return a special 'zeroclaw' kind the caller handles.
-  const endpoint = conn.endpoint.replace(/\/$/, '')
-  const chatUrl = endpoint.endsWith('/chat/completions')
-    ? endpoint
-    : endpoint.endsWith('/v1')
-      ? endpoint + '/chat/completions'
-      : endpoint + '/v1/chat/completions'
-  return {
-    kind: 'custom',
-    baseUrl: chatUrl.replace('/chat/completions', ''),
-    apiKey: conn.token,
-    model: conn.model || 'default',
-  }
+
+  const base = conn.endpoint.replace(/\/$/, '')
+
+  // ZeroClaw's daemon doesn't expose a standard /v1/chat/completions
+  // — it uses /webhook. So we return a 'zeroclaw' kind that the
+  // fallback chain in ai.ts handles by calling runZeroclawTask.
+  // For now, we return undefined so the fallback chain uses built-in GLM.
+  // The /api/zeroclaw/run endpoint handles direct ZeroClaw calls.
+  return undefined
 }
