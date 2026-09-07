@@ -25,6 +25,23 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion", "@radix-ui/react-dialog"],
   },
+  // CSP headers — allow unsafe-eval in dev (needed by some deps + the preview gateway)
+  // In production, this is tightened to only allow self + unsafe-inline
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: process.env.NODE_ENV === 'production'
+              ? "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data: blob:; font-src 'self' https:; connect-src 'self' https: ws: wss:; frame-src 'self';"
+              : "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data: blob:; font-src 'self' https:; connect-src 'self' https: ws: wss: http:; frame-src 'self';",
+          },
+        ],
+      },
+    ]
+  },
 };
 
 export default nextConfig;
