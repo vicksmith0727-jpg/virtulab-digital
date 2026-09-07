@@ -1,0 +1,75 @@
+# VirtuaLab Digital — LLM.txt
+
+> VirtuaLab Digital is an organic, no-code website builder SaaS for small businesses drained by agencies. No paid ads, ever. Built for tradespeople and local services, not marketers.
+
+## What it does
+VirtuaLab Digital helps small business owners build websites, run SEO, generate content, manage social media, and automate their digital marketing — all from one dashboard, without coding, without agencies, without paid ads.
+
+## Core features
+- Drag & drop website builder (full-screen, unlimited colors, typography, effects, media upload)
+- 35 SEO tools (audit, technical, strategy, keyword research with PAS/PAA/FAQs)
+- 10 social media tools (captions, hashtags, bios, carousels, content calendars)
+- 15 content generation tools (blogs, landing pages, email sequences, press releases)
+- 10 project management tools (Kanban, tasks, time tracker, CRM, invoices)
+- 10 automation tools (n8n, Zeroclaw, auto-publish, auto-reports)
+- 5 orchestration flow templates (tool pipelines that chain outputs into inputs)
+- 48 integrations (all MCP servers auto-detect, zero manual entry)
+- Authentication (register/login/session)
+- Dashboard assistant (Asymmetrical SEO Strategist persona)
+- Usage + plan monitor, team + access control
+- WordPress publishing (13 builders, any combination)
+- Self-host option (Docker + docker-compose for free tiers)
+- Agency sub-domain config (traffic routes to main website)
+
+## AI persona
+The integrated AI speaks as the "Asymmetrical SEO Strategist" — helping small businesses win against bigger competitors not by outspending them, but by outthinking them. Find the gaps, the long-tail keywords, the local opportunities that big competitors are too lazy to create. Never recommend paid ads. Never recommend copying big brands. Recommend doing what they CAN'T: hyper-local, hyper-specific, hyper-honest content.
+
+## Tech stack
+- Next.js 16 (App Router) + TypeScript 5
+- Tailwind CSS 4 + shadcn/ui (New York style)
+- Prisma ORM (SQLite)
+- Zustand for client state, TanStack Query for server state
+- @dnd-kit for drag & drop
+- framer-motion for animations
+- z-ai-web-dev-sdk for AI (LLM, vision, etc.)
+- bcryptjs for auth
+- Organic color palette (forest/sage/terracotta/moss/clay/sand/cream/bark)
+
+## API endpoints
+- /api/auth/register, /api/auth/login, /api/auth/logout, /api/auth/session
+- /api/account (GET user profile + usage + plan, PATCH update)
+- /api/projects (CRUD), /api/projects/[id]/pages/[pageId] (CRUD)
+- /api/templates (GET), /api/templates/seed (POST), /api/templates/custom (POST)
+- /api/integrations (GET catalog + connections, POST connect, PATCH/DELETE)
+- /api/integrations/auto-detect (GET scan, POST auto-connect)
+- /api/integrations/custom (POST add custom integration)
+- /api/seo/audit (POST full audit), /api/seo/check (POST focused check)
+- /api/seo/keyword-research (POST enriched research with PAS/PAA/FAQs)
+- /api/seo/tools (GET 35 tools catalog), /api/seo/meta-check, /api/seo/sitemap-check
+- /api/tools/catalog (GET social + content tools), /api/tools/custom (CRUD)
+- /api/flows (GET templates + custom, POST save), /api/flows/run (POST execute)
+- /api/ai/chat (POST with persona), /api/ai/generate (POST block content)
+- /api/ai/tools (GET tool catalog for AI router)
+- /api/zeroclaw/run (GET status, POST run task)
+- /api/media (GET list, POST upload)
+- /api/export/[id] (GET HTML), /api/export/[id]/wordpress (POST publish)
+- /api/wordpress/builders (GET 13 builders)
+- /api/agency (GET agency config), /api/self-host (GET self-host guide)
+- /api/capabilities (GET service pillars + LLM model presets)
+- /api/builder-mode (GET 3 modes: drag-drop/code/hybrid)
+- /api/inbox (GET unified messages)
+- /api/pm/catalog, /api/pm/tasks, /api/pm/clients, /api/pm/projects, /api/pm/time
+- /api/automation/catalog (GET 10 tools), /api/automation (POST toggle)
+- /api/analytics (GET stats)
+- /api/settings/llm (GET/PATCH BYO-LLM provider)
+- /api/oauth/[provider]/start, /api/oauth/[provider]/callback
+- /sitemap.xml, /robots.txt
+
+## Integration approach
+All MCP servers are auto-detect (zero manual endpoint entry). The app scans localhost + configured VPS host for running MCP servers and auto-connects when found. OAuth credentials are configured at the MCP server level, not in VirtuaLab Digital.
+
+## Self-host
+Free tiers can self-host via Docker. The Dockerfile + docker-compose.yml are included. Self-hosted instances run as standalone (not subdomain). All data stays on your server. No telemetry.
+
+## Mission
+Help small business owners who've been drained by agencies with no progress. Every tool here is built for organic, local growth — search, GMB, word of mouth, email newsletters, content. No paid ads. No agency retainers. No bloat.

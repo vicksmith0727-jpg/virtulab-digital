@@ -65,6 +65,13 @@ export async function POST(req: NextRequest) {
       },
     })
 
+    // Send a welcome email (fire-and-forget — don't block registration)
+    fetch(new URL('/api/email', req.url), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email }),
+    }).catch(() => {})
+
     // Set the cookie
     const res = NextResponse.json({
       ok: true,
