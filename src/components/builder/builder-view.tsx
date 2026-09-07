@@ -907,7 +907,7 @@ export function BuilderView({ projectId, pageId }: { projectId: string; pageId?:
           <div className="flex-1 flex flex-col min-h-0">
             {/* Top — visual canvas */}
             <div className="flex-1 flex min-h-0 border-b border-border">
-              <aside className="w-60 hidden md:flex flex-col shrink-0">
+              <aside className="w-56 sm:w-60 flex flex-col shrink-0 border-r border-border bg-card overflow-hidden">
                 <BlockPalette onAdd={addBlock} />
               </aside>
               <div className="flex-1 min-h-0 overflow-auto bg-muted/30">
@@ -974,8 +974,8 @@ export function BuilderView({ projectId, pageId }: { projectId: string; pageId?:
           </div>
         ) : (
           <>
-            {/* Palette */}
-            <aside className="w-60 hidden md:flex flex-col shrink-0">
+            {/* Palette — always visible (even on mobile device preview) */}
+            <aside className="w-56 sm:w-60 flex flex-col shrink-0 border-r border-border bg-card overflow-hidden">
               <BlockPalette onAdd={addBlock} />
             </aside>
 
