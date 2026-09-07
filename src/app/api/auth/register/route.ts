@@ -1,21 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { getClientIp } from '@/lib/get-client-ip'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 
 // POST /api/auth/register
 // Body: { name, email, password }
-// Creates a new user with a bcrypt-hashed password. Returns a session token
-// (stored in an httpOnly cookie) + the user profile (without the password).
-//
-// This is a simple session-token auth (not NextAuth.js) for the sandbox.
-// In production, swap for NextAuth.js with the same API shape.
+// Creates a new user. Rate-limits registrations per IP (max 3 per 24h).
 
 const SESSION_COOKIE = 'vl_session'
 const SESSION_DAYS = 30
+const MAX_REGISTRATIONS = 3
+const COOLDOWN_WINDOW_MS = 24 * 60 * 60 * 1000
 
 export async function POST(req: NextRequest) {
   try {
+    // ── IP-based registration tracking ──
+    const clientIp = await getClientIp()
+    const now = new Date()
+
+    const track = await db.registrationTrack.findUnique({ where: { ip: clientIp } })
+    if (track) {
+      const timePassed = now.getTime() - track.updatedAt.getTime()
+      if (timePassed < COOLDOWN_WINDOW_MS) {
+        if (track.count >= MAX_REGISTRATIONS) {
+          return NextResponse.json(
+            { error: 'Registration threshold exceeded. Multiple free signups from this network are temporarily blocked.' },
+            { status: 429 },
+          )
+        }
+        await db.registrationTrack.update({
+          where: { ip: clientIp },
+          data: { count: track.count + 1 },
+        })
+      } else {
+        await db.registrationTrack.update({
+          where: { ip: clientIp },
+          data: { count: 1 },
+        })
+      }
+    } else {
+      await db.registrationTrack.create({ data: { ip: clientIp, count: 1 } })
+    }
+
     const body = await req.json().catch(() => ({}))
     const name = typeof body?.name === 'string' ? body.name.trim() : ''
     const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : ''

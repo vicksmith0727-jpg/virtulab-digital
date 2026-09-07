@@ -761,7 +761,6 @@ export function AppShell({
 
   // Top-bar title for the current view.
   function viewTitle(name: View['name']): string {
-    if (name === 'self-host') return 'Self-host'
     if (name === 'seo-tools') return 'SEO Tools'
     if (name === 'social-tools') return 'Social Media Tools'
     if (name === 'content-tools') return 'Content Generation'
@@ -823,22 +822,6 @@ export function AppShell({
                 unreadCount={unreadCount}
                 access={access}
               />
-              {/* Self-host button — sits after the main nav list, before the theme toggle */}
-              <div className="px-3 mt-3">
-                <button
-                  type="button"
-                  onClick={() => setView({ name: 'self-host' })}
-                  className={cn(
-                    'w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition',
-                    activeName === 'self-host'
-                      ? 'bg-forest/10 text-forest font-medium'
-                      : 'text-foreground/80 hover:bg-muted hover:text-foreground',
-                  )}
-                >
-                  <Server className="size-4" />
-                  Self-host
-                </button>
-              </div>
             </div>
           </ScrollArea>
           <div className="p-3 border-t border-border space-y-1">
@@ -888,25 +871,6 @@ export function AppShell({
                   unreadCount={unreadCount}
                   access={access}
                 />
-                {/* Self-host button — mobile */}
-                <div className="px-3 mt-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobileNavOpen(false)
-                      setView({ name: 'self-host' })
-                    }}
-                    className={cn(
-                      'w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition',
-                      activeName === 'self-host'
-                        ? 'bg-forest/10 text-forest font-medium'
-                        : 'text-foreground/80 hover:bg-muted hover:text-foreground',
-                    )}
-                  >
-                    <Server className="size-4" />
-                    Self-host
-                  </button>
-                </div>
               </div>
             </ScrollArea>
             <div className="p-3 border-t border-border space-y-2">

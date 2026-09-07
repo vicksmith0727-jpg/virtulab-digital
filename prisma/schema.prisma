@@ -236,3 +236,22 @@ model ChatMessage {
 
   @@index([chatSessionId])
 }
+
+// ── Rate limiting ──
+
+model RateLimit {
+  key       String   @id // "ip:endpoint" or "userId:endpoint"
+  tokens    Int      // Remaining allowed requests
+  resetAt   DateTime // When the limit window resets
+  updatedAt DateTime @updatedAt
+}
+
+// ── Registration tracking ──
+
+model RegistrationTrack {
+  id        String   @id @default(cuid())
+  ip        String   @unique
+  count     Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

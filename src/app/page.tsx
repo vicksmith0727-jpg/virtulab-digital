@@ -14,7 +14,6 @@ import { TemplatesView } from '@/components/views/templates-view'
 import { IntegrationsView } from '@/components/views/integrations-view'
 import { AnalyticsView } from '@/components/views/analytics-view'
 import { SettingsView } from '@/components/views/settings-view'
-import { SelfHostView } from '@/components/views/self-host-view'
 import { SeoToolsView } from '@/components/views/seo-tools-view'
 import { InboxView } from '@/components/views/inbox-view'
 import { SocialToolsView } from '@/components/views/social-tools-view'
@@ -180,7 +179,6 @@ function AppContent() {
       {view.name === 'integrations' && <IntegrationsView />}
       {view.name === 'analytics' && <AnalyticsView />}
       {view.name === 'settings' && <SettingsView />}
-      {view.name === 'self-host' && <SelfHostView />}
       {view.name === 'seo-tools' && <SeoToolsView />}
       {view.name === 'inbox' && <InboxView />}
       {view.name === 'social-tools' && <SocialToolsView />}

@@ -8,7 +8,6 @@ export type View =
   | { name: 'settings' }
   | { name: 'templates' }
   | { name: 'analytics' }
-  | { name: 'self-host' }
   | { name: 'seo-tools' }
   | { name: 'inbox' }
   | { name: 'social-tools' }

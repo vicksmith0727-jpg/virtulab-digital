@@ -2,22 +2,52 @@ import { NextRequest, NextResponse } from 'next/server'
 import { aiChat, resolveProvider, type ProviderConfig } from '@/lib/ai'
 import { ASYMMETRICAL_SEO_STRATEGIST_PROMPT } from '@/ai/personas/seo-strategist'
 import { ChatRouteSchema } from '@/lib/validations/chat'
+import { checkRateLimit, isPaidUser } from '@/lib/rate-limiter'
+import { getClientIp } from '@/lib/get-client-ip'
 import { db } from '@/lib/db'
 
 // POST /api/ai/chat
 // Body: { messages: [{role, content}], projectId?, sessionId? }
 //
-// Zod-validated. Enforces the Asymmetrical SEO Strategist persona as the system
-// message. Persists chat sessions + messages to the database. Loads history
-// from the DB for context when a sessionId is provided.
-//
-// Returns: { reply, sessionId } — the sessionId can be used in subsequent
-// calls to maintain conversation context across requests.
+// Zod-validated. Rate-limited (10 requests/hour for free tier, unlimited for paid).
+// Enforces the Asymmetrical SEO Strategist persona. Persists to DB.
 
 type ChatMessage = { role: 'user' | 'assistant' | 'system'; content: string }
 
 export async function POST(req: NextRequest) {
   try {
+    // ── Rate limiting ──
+    const clientIp = await getClientIp()
+    const rateLimitKey = `${clientIp}:ai-chat`
+
+    // Check if the current user is a paid subscriber (bypasses rate limit)
+    const user = await db.user.findFirst()
+    const paid = await isPaidUser(user?.id)
+
+    if (!paid) {
+      const limitResult = await checkRateLimit({
+        key: rateLimitKey,
+        limit: 10,         // 10 requests per hour for free tier
+        windowMs: 60 * 60 * 1000,
+      })
+
+      if (!limitResult.success) {
+        return NextResponse.json(
+          {
+            error: 'Rate limit exceeded. Please wait before asking the strategist again.',
+            resetAt: limitResult.resetAt.toISOString(),
+            remaining: 0,
+          },
+          {
+            status: 429,
+            headers: {
+              'Retry-After': Math.ceil((limitResult.resetAt.getTime() - Date.now()) / 1000).toString(),
+            },
+          },
+        )
+      }
+    }
+
     const rawBody = await req.json().catch(() => ({}))
 
     // 1. Zod validation
