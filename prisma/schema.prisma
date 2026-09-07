@@ -1,0 +1,210 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  avatarUrl String?
+  password  String?  // bcrypt hash — null for the demo user (no password = auto-login)
+  plan      String   @default("seed") // seed, sprout, grove, forest
+  role      String   @default("owner") // owner, admin, member
+  // Access control — which features this user can access
+  canAccessBuilder   Boolean @default(true)
+  canAccessSEO       Boolean @default(true)
+  canAccessSocial    Boolean @default(true)
+  canAccessContent   Boolean @default(true)
+  canAccessPM        Boolean @default(true)
+  canAccessAutomation Boolean @default(true)
+  canAccessInbox     Boolean @default(true)
+  canAccessIntegrations Boolean @default(true)
+  canAccessAnalytics Boolean @default(true)
+  canAccessSettings  Boolean @default(true)
+  canAccessAPISettings Boolean @default(false) // only owner + admin
+  canAccessExternalSecrets Boolean @default(false) // only owner + admin
+  // AI persona — the assistant's personality/tone when using the integrated API
+  aiPersonaName    String?
+  aiPersonaTone   String?  // e.g. "warm, organic, practical"
+  aiPersonaSystem String?  // full system prompt override
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projects  Project[]
+  settings  Settings[]
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  subdomain   String?  @unique
+  description String?
+  status      String   @default("draft") // draft, published
+  thumbnail   String?
+  pages       Page[]
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Page {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name        String
+  slug        String
+  blocks      String   // JSON array of block configs
+  isHome      Boolean  @default(false)
+  metaTitle   String?
+  metaDesc    String?
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([projectId, slug])
+  @@index([projectId])
+}
+
+model Template {
+  id          String   @id @default(cuid())
+  name        String
+  category    String   @default("organic")
+  description String?
+  thumbnail   String?
+  blocks      String   // JSON array of block configs
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model Integration {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  category    String   // analytics, payments, email, forms, seo, ai, etc.
+  description String?
+  iconKey     String?
+  fields      String   // JSON schema of required fields
+  status      String   @default("available") // available, connected, error
+  connections IntegrationConnection[]
+  createdAt   DateTime @default(now())
+}
+
+model IntegrationConnection {
+  id            String   @id @default(cuid())
+  integrationId String
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  projectId     String?
+  config        String   // JSON encrypted-ish config
+  enabled       Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Settings {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  key    String
+  value  String
+
+  @@unique([userId, key])
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  projectId String?
+  action    String
+  detail    String?
+  createdAt DateTime @default(now())
+}
+
+// ── Project Management models ──
+
+model Client {
+  id          String   @id @default(cuid())
+  name        String
+  email       String?
+  phone       String?
+  company     String?
+  notes       String?
+  status      String   @default("active") // active, paused, churned
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  projects    ProjectRecord[]
+  tasks       Task[]
+  timeEntries TimeEntry[]
+}
+
+model ProjectRecord {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  status      String   @default("planning") // planning, active, review, completed, on-hold
+  priority     String   @default("medium") // low, medium, high, urgent
+  dueDate     DateTime?
+  startedAt   DateTime?
+  completedAt DateTime?
+  clientId    String?
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tasks       Task[]
+  timeEntries TimeEntry[]
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  status      String   @default("todo") // todo, in-progress, review, done
+  priority    String   @default("medium") // low, medium, high, urgent
+  dueDate     DateTime?
+  completedAt DateTime?
+  // Link to a project record (PM), OR to a builder Project (via projectId)
+  projectRecordId String?
+  projectRecord   ProjectRecord? @relation(fields: [projectRecordId], references: [id], onDelete: Cascade)
+  clientId    String?
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  assignee    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TimeEntry {
+  id          String   @id @default(cuid())
+  description String
+  startedAt   DateTime
+  endedAt     DateTime?
+  durationMin Int      @default(0)
+  billable    Boolean  @default(true)
+  // Link to a project record (PM), OR to a builder Project
+  projectRecordId String?
+  projectRecord   ProjectRecord? @relation(fields: [projectRecordId], references: [id], onDelete: Cascade)
+  clientId    String?
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  task        String?
+  createdAt   DateTime @default(now())
+}
+
+model Automation {
+  id        String   @id @default(cuid())
+  name      String
+  toolId    String
+  enabled   Boolean  @default(false)
+  config    String   // JSON config
+  lastRunAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -1,0 +1,39 @@
+# Self-host VirtuaLab Digital with Docker Compose.
+# Free tier — run on any 2GB+ VPS or your laptop.
+#
+# 1. cp .env.example .env  && edit values
+# 2. docker compose up -d
+# 3. Open http://localhost:3000
+
+services:
+  virtulab:
+    build: .
+    # image: virtulab/digital:latest  # use a prebuilt image if available
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=file:/data/virtulab.db
+      - AGENCY_NAME=${AGENCY_NAME:-VirtuaLab Agency}
+      - AGENCY_MAIN_URL=${AGENCY_MAIN_URL:-https://virtulab.agency}
+      - AGENCY_SUBDOMAIN_LABEL=${AGENCY_SUBDOMAIN_LABEL:-builder}
+      - AGENCY_IS_SUBDOMAIN=false
+      # Optional: BYO LLM (Ollama local = free)
+      # - LLM_BASE_URL=http://host.docker.internal:11434/v1
+      # - LLM_MODEL=llama3.1
+      # Optional: OAuth providers (leave blank for demo mode)
+      # - GSC_CLIENT_ID=
+      # - GSC_CLIENT_SECRET=
+      # - FACEBOOK_CLIENT_ID=
+      # - FACEBOOK_CLIENT_SECRET=
+      # - X_CLIENT_ID=
+      # - X_CLIENT_SECRET=
+      # - INSTAGRAM_CLIENT_ID=
+      # - INSTAGRAM_CLIENT_SECRET=
+      # - LINKEDIN_CLIENT_ID=
+      # - LINKEDIN_CLIENT_SECRET=
+    volumes:
+      - virtulab-data:/data
+    restart: unless-stopped
+
+volumes:
+  virtulab-data:
