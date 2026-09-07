@@ -85,7 +85,15 @@ export function AuthView() {
 
   // "Continue as demo" — uses /api/auth/demo (bypasses all rate limits)
   const demoMut = useMutation({
-    mutationFn: async () => postJson('/api/auth/demo', { method: 'POST' } as any),
+    mutationFn: async () => {
+      const res = await fetch('/api/auth/demo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || 'Demo failed')
+      return data
+    },
     onSuccess: () => {
       toast({ title: 'Demo session ready', description: 'Opening the studio…' })
       setTimeout(() => window.location.reload(), 350)

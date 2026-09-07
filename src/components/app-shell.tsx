@@ -790,15 +790,9 @@ export function AppShell({
   }, [])
 
   // Builder runs FULL-SCREEN — no sidebar, no app topbar, no mobile hamburger.
-  // The builder view has its own toolbar (Back, Preview, AI Router, WordPress,
-  // SEO Audit, Save, Publish), so we strip away the app chrome entirely and let
-  // the canvas take the full width on every breakpoint.
-  if (isBuilder) {
-    return (
-      <div className="min-h-screen flex flex-col bg-background">{children}</div>
-    )
-  }
-
+  // The builder view now shows the sidebar nav (user requested it back)
+  // The builder has its own toolbar (Back, Preview, AI Router, WordPress, Save, Publish)
+  // The sidebar adds navigation context (Dashboard, Inbox, Tools, etc.)
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <div className="flex flex-1 min-h-0">
