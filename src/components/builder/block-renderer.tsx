@@ -877,7 +877,7 @@ function FooterBlock({ block }: { block: BlockInstance }) {
               <span className="size-8 rounded-full bg-forest flex items-center justify-center text-primary-foreground">
                 <LucideIcons.Sprout className="size-4" />
               </span>
-              <span className="font-semibold text-cream">VirtuaLab Digital</span>
+              <span className="font-semibold text-cream">Sage</span>
             </div>
             <p className="text-sm text-cream/70 max-w-xs">{p.tagline}</p>
           </div>

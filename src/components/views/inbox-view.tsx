@@ -39,6 +39,7 @@ import {
 } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import { fetchJson } from '@/lib/client-utils'
 
 /* ------------------------------------------------------------------ */
 
@@ -78,14 +79,6 @@ interface AiChatResponse {
   reply: string
 }
 
-async function fetchJson(url: string, opts?: RequestInit) {
-  const res = await fetch(url, opts)
-  if (!res.ok) {
-    const txt = await res.text().catch(() => '')
-    throw new Error(txt || `Request failed (${res.status})`)
-  }
-  return res.json()
-}
 
 function relativeTime(iso: string): string {
   const t = new Date(iso).getTime()

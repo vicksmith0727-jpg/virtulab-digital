@@ -38,30 +38,12 @@ import {
 } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import { fetchJson, DynamicIcon, getLucideIcon } from '@/lib/client-utils'
 
 /* ------------------------------------------------------------------ */
 /* Shared helpers                                                      */
 /* ------------------------------------------------------------------ */
 
-async function fetchJson(url: string, opts?: RequestInit) {
-  const res = await fetch(url, opts)
-  if (!res.ok) {
-    const txt = await res.text().catch(() => '')
-    throw new Error(txt || `Request failed (${res.status})`)
-  }
-  return res.json()
-}
-
-function getLucideIcon(name?: string) {
-  if (!name) return HelpCircle
-  const ic = (LucideIcons as Record<string, any>)[name]
-  return (ic as typeof HelpCircle) ?? HelpCircle
-}
-
-function DynamicIcon({ name, className }: { name?: string; className?: string }) {
-  const Cmp = getLucideIcon(name)
-  return React.createElement(Cmp as any, { className })
-}
 
 function copyToClipboard(text: string, label: string, toast: ReturnType<typeof useToast>['toast']) {
   if (typeof navigator === 'undefined' || !navigator.clipboard) {

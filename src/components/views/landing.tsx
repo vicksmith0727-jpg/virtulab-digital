@@ -30,14 +30,10 @@ import { useAppStore } from '@/lib/store'
 import { Button } from '@/components/ui/button'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { cn } from '@/lib/utils'
+import { fetchJson } from '@/lib/client-utils'
 
 /* ------------------------------------------------------------------ */
 
-async function fetchJson(url: string, opts?: RequestInit) {
-  const res = await fetch(url, opts)
-  if (!res.ok) throw new Error((await res.text().catch(() => '')) || 'Request failed')
-  return res.json()
-}
 
 interface AgencyData {
   agency: {
@@ -86,12 +82,12 @@ function Nav({ onOpenMenu }: { onOpenMenu?: () => void }) {
           type="button"
           className="flex items-center gap-2"
           onClick={() => setView({ name: 'landing' })}
-          aria-label="VirtuaLab Digital home"
+          aria-label="Sage by VirtuaLab Digital home"
         >
           <span className="size-8 rounded-full bg-forest text-primary-foreground flex items-center justify-center">
             <Sprout className="size-4" />
           </span>
-          <span className="font-semibold text-foreground">VirtuaLab Digital</span>
+          <span className="font-semibold text-foreground">Sage</span>
         </button>
 
         {agency?.name && (
@@ -586,7 +582,7 @@ export function LandingView() {
               <span className="size-8 rounded-full bg-forest flex items-center justify-center text-primary-foreground">
                 <Sprout className="size-4" />
               </span>
-              <span className="font-semibold text-cream">VirtuaLab Digital</span>
+              <span className="font-semibold text-cream">Sage</span>
             </div>
             <p className="text-sm text-cream/70 max-w-xs">
               Grown locally. Built honestly. No paid ads, ever.

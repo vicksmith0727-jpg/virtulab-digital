@@ -1,9 +1,9 @@
 # VirtuaLab Digital — LLM.txt
 
-> VirtuaLab Digital is an organic, no-code website builder SaaS for small businesses drained by agencies. No paid ads, ever. Built for tradespeople and local services, not marketers.
+> Sage by VirtuaLab Digital is an organic, no-code website builder SaaS for small businesses drained by agencies. No paid ads, ever. Built for tradespeople and local services, not marketers.
 
 ## What it does
-VirtuaLab Digital helps small business owners build websites, run SEO, generate content, manage social media, and automate their digital marketing — all from one dashboard, without coding, without agencies, without paid ads.
+Sage by VirtuaLab Digital helps small business owners build websites, run SEO, generate content, manage social media, and automate their digital marketing — all from one dashboard, without coding, without agencies, without paid ads.
 
 ## Core features
 - Drag & drop website builder (full-screen, unlimited colors, typography, effects, media upload)
@@ -70,7 +70,7 @@ All responses return standardized JSON payloads, except where file streaming is 
 - /sitemap.xml, /robots.txt, /llm.txt
 
 ## Integration approach
-All MCP servers are auto-detect (zero manual endpoint entry). The app scans localhost + configured VPS host for running MCP servers and auto-connects when found. OAuth credentials are configured at the MCP server level, not in VirtuaLab Digital.
+All MCP servers are auto-detect (zero manual endpoint entry). The app scans localhost + configured VPS host for running MCP servers and auto-connects when found. OAuth credentials are configured at the MCP server level, not in Sage by VirtuaLab Digital.
 
 ## Self-host
 Free tiers can self-host via Docker. The Dockerfile + docker-compose.yml are included. Self-hosted instances run as standalone (not subdomain). All data stays on your server. No telemetry.

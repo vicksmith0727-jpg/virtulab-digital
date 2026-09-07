@@ -179,7 +179,7 @@ function Logo({ agencyName, agencyUrl }: { agencyName?: string; agencyUrl?: stri
         <Sprout className="size-4" />
       </span>
       <div className="flex flex-col leading-tight">
-        <span className="font-semibold text-foreground">VirtuaLab Digital</span>
+        <span className="font-semibold text-foreground">Sage</span>
         {agencyName && (
           <span className="text-[11px] text-muted-foreground">
             by{' '}
@@ -916,7 +916,7 @@ export function AppShell({
                 type="button"
                 onClick={() => setView({ name: 'landing' })}
                 className="flex items-center gap-2"
-                aria-label="VirtuaLab Digital home"
+                aria-label="Sage by VirtuaLab Digital home"
               >
                 <span className="size-7 rounded-full bg-forest text-primary-foreground flex items-center justify-center">
                   <Sprout className="size-3.5" />

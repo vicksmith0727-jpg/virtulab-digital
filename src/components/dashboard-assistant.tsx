@@ -210,7 +210,7 @@ export function DashboardAssistant() {
               'sm:left-auto sm:right-6 sm:bottom-6 sm:w-[380px] sm:max-h-[500px] sm:rounded-2xl sm:rounded-b-2xl',
             )}
             role="dialog"
-            aria-label="VirtuaLab Assistant chat"
+            aria-label="Sage chat"
           >
             {/* Header */}
             <div className="flex items-center gap-3 px-4 py-3 bg-forest text-primary-foreground">
@@ -218,7 +218,7 @@ export function DashboardAssistant() {
                 <Sprout className="size-4" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold leading-tight">VirtuaLab Assistant</p>
+                <p className="text-sm font-semibold leading-tight">Sage</p>
                 <p className="text-[11px] opacity-80 leading-tight">
                   Organic growth · no ads, ever
                 </p>

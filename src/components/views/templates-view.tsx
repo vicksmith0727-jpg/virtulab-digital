@@ -42,6 +42,7 @@ import {
 } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import { fetchJson } from '@/lib/client-utils'
 
 /* ------------------------------------------------------------------ */
 
@@ -54,11 +55,6 @@ interface Template {
   blocks: any[]
 }
 
-async function fetchJson(url: string, opts?: RequestInit) {
-  const res = await fetch(url, opts)
-  if (!res.ok) throw new Error((await res.text().catch(() => '')) || 'Request failed')
-  return res.json()
-}
 
 const gradientFor = (key: string) => {
   const grads = [

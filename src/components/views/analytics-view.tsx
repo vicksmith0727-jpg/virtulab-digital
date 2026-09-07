@@ -27,6 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { fetchJson } from '@/lib/client-utils'
 
 /* ------------------------------------------------------------------ */
 
@@ -53,11 +54,6 @@ interface Analytics {
   }
 }
 
-async function fetchJson(url: string) {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error((await res.text().catch(() => '')) || 'Request failed')
-  return res.json()
-}
 
 const barColors = ['var(--color-forest)', 'var(--color-chart-2)', 'var(--color-chart-3)', 'var(--color-chart-4)', 'var(--color-chart-5)']
 
