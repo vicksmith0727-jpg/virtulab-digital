@@ -83,28 +83,9 @@ export function AuthView() {
       toast({ title: 'Registration failed', description: err.message, variant: 'destructive' }),
   })
 
-  // "Continue as demo" — auto-creates the demo user. If they already exist
-  // (409 conflict), fall back to login with the same creds.
+  // "Continue as demo" — uses /api/auth/demo (bypasses all rate limits)
   const demoMut = useMutation({
-    mutationFn: async () => {
-      const creds = {
-        name: 'Demo User',
-        email: 'demo@virtulab.local',
-        password: 'demodemo',
-      }
-      try {
-        return await postJson('/api/auth/register', creds)
-      } catch (err) {
-        const e = err as Error & { status?: number }
-        if (e?.status === 409) {
-          return postJson('/api/auth/login', {
-            email: creds.email,
-            password: creds.password,
-          })
-        }
-        throw err
-      }
-    },
+    mutationFn: async () => postJson('/api/auth/demo', { method: 'POST' } as any),
     onSuccess: () => {
       toast({ title: 'Demo session ready', description: 'Opening the studio…' })
       setTimeout(() => window.location.reload(), 350)
