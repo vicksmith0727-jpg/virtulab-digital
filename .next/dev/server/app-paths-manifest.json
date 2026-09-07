@@ -1,0 +1,8 @@
+{
+  "/api/projects/route": "app/api/projects/route.js",
+  "/api/capabilities/route": "app/api/capabilities/route.js",
+  "/api/auth/session/route": "app/api/auth/session/route.js",
+  "/api/seed/route": "app/api/seed/route.js",
+  "/api/agency/route": "app/api/agency/route.js",
+  "/page": "app/page.js"
+}
