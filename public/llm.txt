@@ -24,21 +24,23 @@ VirtuaLab Digital helps small business owners build websites, run SEO, generate 
 ## AI persona
 The integrated AI speaks as the "Asymmetrical SEO Strategist" — helping small businesses win against bigger competitors not by outspending them, but by outthinking them. Find the gaps, the long-tail keywords, the local opportunities that big competitors are too lazy to create. Never recommend paid ads. Never recommend copying big brands. Recommend doing what they CAN'T: hyper-local, hyper-specific, hyper-honest content.
 
-## Tech stack
-- Next.js 16 (App Router) + TypeScript 5
-- Tailwind CSS 4 + shadcn/ui (New York style)
-- Prisma ORM (SQLite)
-- Zustand for client state, TanStack Query for server state
-- @dnd-kit for drag & drop
-- framer-motion for animations
-- z-ai-web-dev-sdk for AI (LLM, vision, etc.)
-- bcryptjs for auth
-- Organic color palette (forest/sage/terracotta/moss/clay/sand/cream/bark)
+## Tech stack & Coding Rules
+- **Framework:** Next.js 16 (App Router, strict TypeScript 5). Always treat dynamic segment parameters (e.g., `params`, `searchParams`) as promises in async Server Components and API routes.
+- **Styling:** Tailwind CSS 4 + shadcn/ui (New York style). Use Tailwind 4 CSS-based `@theme` directives; do not generate legacy `tailwind.config.js` configurations.
+- **Database:** Prisma ORM with SQLite. Do not write PostgreSQL/MySQL-specific raw queries or features unsupported by SQLite.
+- **State:** Zustand for client state, TanStack Query for server state.
+- **UI Libraries:** @dnd-kit for drag & drop, framer-motion for animations.
+- **AI Core:** z-ai-web-dev-sdk for LLM routing, vision, and context parsing.
+- **Auth:** bcryptjs for authentication hashing.
+- **Design Token:** Organic color palette (forest, sage, terracotta, moss, clay, sand, cream, bark).
 
 ## API endpoints
+All responses return standardized JSON payloads, except where file streaming is explicitly noted.
 - /api/auth/register, /api/auth/login, /api/auth/logout, /api/auth/session
 - /api/account (GET user profile + usage + plan, PATCH update)
 - /api/projects (CRUD), /api/projects/[id]/pages/[pageId] (CRUD)
+- /api/projects/[id]/chats (GET list sessions, POST create session)
+- /api/projects/[id]/chats/[sessionId] (PATCH rename, DELETE remove)
 - /api/templates (GET), /api/templates/seed (POST), /api/templates/custom (POST)
 - /api/integrations (GET catalog + connections, POST connect, PATCH/DELETE)
 - /api/integrations/auto-detect (GET scan, POST auto-connect)
@@ -48,11 +50,12 @@ The integrated AI speaks as the "Asymmetrical SEO Strategist" — helping small 
 - /api/seo/tools (GET 35 tools catalog), /api/seo/meta-check, /api/seo/sitemap-check
 - /api/tools/catalog (GET social + content tools), /api/tools/custom (CRUD)
 - /api/flows (GET templates + custom, POST save), /api/flows/run (POST execute)
-- /api/ai/chat (POST with persona), /api/ai/generate (POST block content)
+- /api/ai/chat (POST — SSE streaming with Asymmetrical SEO Strategist persona, Zod-validated, DB-persisted chat sessions)
+- /api/ai/generate (POST block content)
 - /api/ai/tools (GET tool catalog for AI router)
 - /api/zeroclaw/run (GET status, POST run task)
-- /api/media (GET list, POST upload)
-- /api/export/[id] (GET HTML), /api/export/[id]/wordpress (POST publish)
+- /api/media (GET list, POST upload using multipart/form-data)
+- /api/export/[id] (GET static HTML bundle), /api/export/[id]/wordpress (POST publish)
 - /api/wordpress/builders (GET 13 builders)
 - /api/agency (GET agency config), /api/self-host (GET self-host guide)
 - /api/capabilities (GET service pillars + LLM model presets)
@@ -63,7 +66,8 @@ The integrated AI speaks as the "Asymmetrical SEO Strategist" — helping small 
 - /api/analytics (GET stats)
 - /api/settings/llm (GET/PATCH BYO-LLM provider)
 - /api/oauth/[provider]/start, /api/oauth/[provider]/callback
-- /sitemap.xml, /robots.txt
+- /api/email (POST welcome email, PUT system notification)
+- /sitemap.xml, /robots.txt, /llm.txt
 
 ## Integration approach
 All MCP servers are auto-detect (zero manual endpoint entry). The app scans localhost + configured VPS host for running MCP servers and auto-connects when found. OAuth credentials are configured at the MCP server level, not in VirtuaLab Digital.
