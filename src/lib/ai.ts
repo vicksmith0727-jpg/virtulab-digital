@@ -58,8 +58,9 @@ export async function resolveProvider(): Promise<ProviderConfig | undefined> {
 // of which model responds.
 
 const FALLBACK_CHAIN = [
-  { model: 'gemma', label: 'Gemma (fast, 200ms)' },
-  { model: 'phi', label: 'Phi (fast, 300ms)' },
+  { model: 'gemma4:latest', label: 'Gemma4 (fast, 200ms)' },
+  { model: 'deepseek-r1:1.5b', label: 'DeepSeek R1 (fast reasoning, 300ms)' },
+  { model: 'hf.co/LiquidAI/LFM2.5-2.6B-GGUF:Q5_K_M', label: 'LFM2.5 (chat, 400ms)' },
 ]
 
 const FALLBACK_TIMEOUT_MS = 5000 // 5s per model before falling back
