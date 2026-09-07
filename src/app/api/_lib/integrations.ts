@@ -502,11 +502,22 @@ export const INTEGRATION_CATALOG: IntegrationSeed[] = [
     name: 'Kilocode',
     category: 'coding',
     description:
-      'Open-source AI coding agent (another Claude Code alternative). Supports local + free LLM providers. Auto-detected when installed — route AI through it for $0 when using Ollama local models.',
+      'Open-source AI coding agent (Claude Code alternative). Supports Gemini, Ollama, + free LLM providers. Auto-detected when installed — route AI through it for $0. Uses Google Gemini API (free tier: gemini-2.0-flash) or local Ollama models.',
     iconKey: 'Code2',
-    link: 'https://github.com/kilocode/kilocode',
+    link: 'https://github.com/kilocode/kilo',
     authMethod: 'auto',
-    capabilities: ['coding-agent', 'free-llm', 'byo-llm', 'auto-detect'],
+    capabilities: ['coding-agent', 'free-llm', 'byo-llm', 'gemini', 'auto-detect'],
+    fields: [],
+  },
+  {
+    name: 'Gemini CLI',
+    category: 'coding',
+    description:
+      "Google's open-source Gemini CLI — brings Gemini directly into your terminal. Free tier: gemini-2.0-flash (15 RPM, 1500 RPD). Auto-detected when installed. Pairs perfectly with Kilocode + OpenCode for free AI coding on your Linux laptop.",
+    iconKey: 'Terminal',
+    link: 'https://github.com/google-gemini/gemini-cli',
+    authMethod: 'auto',
+    capabilities: ['coding-agent', 'free-llm', 'gemini', 'google', 'auto-detect'],
     fields: [],
   },
   {
